@@ -7,7 +7,7 @@ import time
 import math
 from competitive_sudoku.sudoku import GameState, Move, SudokuBoard, TabooMove
 import competitive_sudoku.sudokuai
-from team43_A1_better_search.regionsudokuboard import RegionSudokuBoard
+from team43_A1_better_search_ab.regionsudokuboard import RegionSudokuBoard
 from typing import List
 
 
@@ -28,7 +28,6 @@ class SudokuAI(competitive_sudoku.sudokuai.SudokuAI):
         m = game_state.board.m
         board = RegionSudokuBoard(game_state)
         all_moves = board.get_moves(game_state.taboo_moves)
-        random.shuffle(all_moves)
         randomMove = random.choice(all_moves)[0]
         self.propose_move(randomMove)
         depth = 0
@@ -57,7 +56,7 @@ class SudokuAI(competitive_sudoku.sudokuai.SudokuAI):
                 board.unmakeMove(move, cell)
             self.propose_move(bestmoveThisDepth)
             #print(f'{bestmoveThisDepth.i} {bestmoveThisDepth.j} {bestmoveThisDepth.value} {bestscoreThisDepth}')
-            #print(depth)
+            print(depth)
             depth += 1
             
     def minimax(self, board: RegionSudokuBoard, tabooMoves: List[TabooMove], depth: int, maximizingPlayer: bool, score: int, alpha, beta):
@@ -68,7 +67,6 @@ class SudokuAI(competitive_sudoku.sudokuai.SudokuAI):
             return score
         bestscore = -math.inf if maximizingPlayer else math.inf
         all_moves = board.get_moves(tabooMoves)
-        random.shuffle(all_moves)
         if len(all_moves) == 0:
             return "mistake"
         mistakeCount = 0

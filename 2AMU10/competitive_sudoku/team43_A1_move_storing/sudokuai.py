@@ -5,10 +5,9 @@
 import random
 import time
 import math
-import copy
 from competitive_sudoku.sudoku import GameState, Move, SudokuBoard, TabooMove
 import competitive_sudoku.sudokuai
-from team43_A1_better_search.regionsudokuboard import RegionSudokuBoard
+from team43_A1_better_search_ab.regionsudokuboard import RegionSudokuBoard
 from typing import List
 
 
@@ -29,7 +28,6 @@ class SudokuAI(competitive_sudoku.sudokuai.SudokuAI):
         m = game_state.board.m
         board = RegionSudokuBoard(game_state)
         all_moves = board.get_moves(game_state.taboo_moves)
-        random.shuffle(all_moves)
         randomMove = random.choice(all_moves)[0]
         self.propose_move(randomMove)
         depth = 0
@@ -42,11 +40,10 @@ class SudokuAI(competitive_sudoku.sudokuai.SudokuAI):
             beta = math.inf
             for move, cell in all_moves:
                 regionsFilled = board.makeMove(move, cell)
-                moveList = copy.deepcopy(all_moves)
                 eval = self.minimax(board, game_state.taboo_moves, depth, False, 
-                                        game_state.scores[0]-game_state.scores[1]+self.pointScore[regionsFilled],
-                                        alpha, beta)
+                                        game_state.scores[0]-game_state.scores[1]+self.pointScore[regionsFilled], alpha, beta)
                 if eval == "mistake":
+                    #print(f'{move.i} {move.j} {move.value} mistake')
                     board.unmakeMove(move, cell)
                     continue
                 if eval > bestscoreThisDepth:
@@ -58,7 +55,8 @@ class SudokuAI(competitive_sudoku.sudokuai.SudokuAI):
                     break
                 board.unmakeMove(move, cell)
             self.propose_move(bestmoveThisDepth)
-            #print(depth)
+            #print(f'{bestmoveThisDepth.i} {bestmoveThisDepth.j} {bestmoveThisDepth.value} {bestscoreThisDepth}')
+            print(depth)
             depth += 1
             
     def minimax(self, board: RegionSudokuBoard, tabooMoves: List[TabooMove], depth: int, maximizingPlayer: bool, score: int, alpha, beta):
@@ -69,7 +67,6 @@ class SudokuAI(competitive_sudoku.sudokuai.SudokuAI):
             return score
         bestscore = -math.inf if maximizingPlayer else math.inf
         all_moves = board.get_moves(tabooMoves)
-        random.shuffle(all_moves)
         if len(all_moves) == 0:
             return "mistake"
         mistakeCount = 0

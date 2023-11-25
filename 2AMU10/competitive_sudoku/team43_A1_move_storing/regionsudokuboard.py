@@ -2,8 +2,8 @@ import random
 import time
 import math
 from competitive_sudoku.sudoku import GameState, Move, SudokuBoard, TabooMove
-from team43_A1_better_search.region import Region
-from team43_A1_better_search.cell import Cell
+from team43_A1_move_storing.region import Region
+from team43_A1_move_storing.cell import Cell
 from typing import List
 
 
