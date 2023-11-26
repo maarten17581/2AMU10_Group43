@@ -7,7 +7,7 @@ import time
 import math
 from competitive_sudoku.sudoku import GameState, Move, SudokuBoard, TabooMove
 import competitive_sudoku.sudokuai
-from team43_A1.regionsudokuboard import RegionSudokuBoard
+from team43_A1_wait_moves.regionsudokuboard import RegionSudokuBoard
 from typing import List
 
 
