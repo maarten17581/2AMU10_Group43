@@ -41,6 +41,9 @@ class SudokuAI(competitive_sudoku.sudokuai.SudokuAI):
         # Start with depth 0 for iterative deepening
         depth = 0
         
+        # The starting difference between the scores of the current state seeing our player as maximizing player
+        dif = game_state.scores[0]-game_state.scores[1] if game_state.current_player() == 1 else game_state.scores[1]-game_state.scores[0]
+        
         # The dictionary used for storing our move sets
         moveListDict = {}
         
@@ -72,7 +75,7 @@ class SudokuAI(competitive_sudoku.sudokuai.SudokuAI):
                 
                 # Run the minimax as maximizing player
                 eval = self.minimax(board, game_state.taboo_moves, depth, False, 
-                                    game_state.scores[0]-game_state.scores[1]+self.pointScore[regionsFilled],
+                                    dif+self.pointScore[regionsFilled],
                                     alpha, beta, subsetMoves, moveListDict)
                 
                 # If this move was a mistake just continue

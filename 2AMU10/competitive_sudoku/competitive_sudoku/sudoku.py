@@ -181,46 +181,46 @@ def print_board(board: SudokuBoard) -> str:
             out.write('\n')
             for j in range(N):
                 if j % n != 0:
-                    out.write('╤═════')
+                    out.write('------')
                 elif j != 0:
-                    out.write('╦═════')
+                    out.write('+-----')
                 else:
-                    out.write('   ╔═════')
-            out.write('╗\n')
+                    out.write('   +-----')
+            out.write('+\n')
 
         # separate regions horizontally
         if i % m == 0 and i != 0:
             for j in range(N):
                 if j % n != 0:
-                    out.write('╪═════')
+                    out.write('------')
                 elif j != 0:
-                    out.write('╬═════')
+                    out.write('+-----')
                 else:
-                    out.write('   ╠═════')
-            out.write('║\n')
+                    out.write('   +-----')
+            out.write('+\n')
 
         # plot values
         out.write(f'{i:2} ')
         for j in range(N):
             symbol = print_square(i, j)
             if j % n != 0:
-                out.write(f'│ {symbol}  ')
+                out.write(f'  {symbol}  ')
             else:
-                out.write(f'║ {symbol}  ')
+                out.write(f'| {symbol}  ')
             if len(symbol) < 2:
                 out.write(' ')
-        out.write('║\n')
+        out.write('|\n')
 
         # close the grid
         if i == N - 1:
             for j in range(N):
                 if j % n != 0:
-                    out.write('╧═════')
+                    out.write('------')
                 elif j != 0:
-                    out.write('╩═════')
+                    out.write('+-----')
                 else:
-                    out.write('   ╚═════')
-            out.write('╝\n')
+                    out.write('   +-----')
+            out.write('+\n')
 
     return out.getvalue()
 
