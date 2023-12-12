@@ -118,6 +118,7 @@ class SudokuAI(competitive_sudoku.sudokuai.SudokuAI):
             
             # Propose the best move for this depth and go to the next
             self.propose_move(bestmoveThisDepth)
+            print(depth)
             depth += 1
     
     def minimax(self, board: RegionSudokuBoard, tabooMoves: List[TabooMove], depth: int, maximizingPlayer: bool, score,

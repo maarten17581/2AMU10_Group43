@@ -1,0 +1,13 @@
+team43_A2 - greedy_player 1-0
+
+greedy_player - team43_A2 0-1
+
+team43_A2 - greedy_player 1-0
+
+greedy_player - team43_A2 0-1
+
+team43_A2 - greedy_player 1-0
+
+greedy_player - team43_A2 0-1
+
+Match result: team43_A2 - greedy_player 6-0
