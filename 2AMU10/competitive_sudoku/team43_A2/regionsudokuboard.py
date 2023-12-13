@@ -13,6 +13,7 @@ class RegionSudokuBoard(object):
     A time efficient Sudoku Board using regions
     """
     
+    # The dictionary storing the moves
     moveListDict = {}
     
     # The table that stores the random values used to generate the key value of the board
@@ -83,6 +84,8 @@ class RegionSudokuBoard(object):
                 cell.rowRegion = self.rowRegions[row]
                 cell.colRegion = self.colRegions[col]
                 cell.boxRegion = self.boxRegions[box]
+                
+                # Add the cell within the region also to the region
                 self.rowRegions[row].allCells.append(cell)
                 self.colRegions[col].allCells.append(cell)
                 self.boxRegions[box].allCells.append(cell)
@@ -106,6 +109,7 @@ class RegionSudokuBoard(object):
                     cell.colRegion.filledCells[value-1] = cell
                     cell.boxRegion.filledCells[value-1] = cell
         
+        # Updating the possible values that cells can have
         for cell in self.cells:
             for value in range(N):
                 if cell.rowRegion.filledCells[value] != self.emptyState:
@@ -127,8 +131,10 @@ class RegionSudokuBoard(object):
             is used for the makeMove() and unmakeMove() methods so are passed back as satalite data.
         """
         
+        # If these moves have already been computed before, return that list
         if self.key in self.moveListDict:
             return self.moveListDict[self.key]
+        
         # Initializing the set of moves
         moves = []
         
@@ -158,7 +164,8 @@ class RegionSudokuBoard(object):
                 
                 # If none of this is the case we add the move to the set of moves
                 moves.append((Move(i, j, value), cell))
-                
+        
+        # After computing all these moves, add it to the table for whenever it is requested again
         self.moveListDict[self.key] = (moves, [])
 
         # Returns the set of moves
@@ -172,11 +179,13 @@ class RegionSudokuBoard(object):
         @return the amount of regions that are filled when applying this move to the sudoku
         """
         
+        # Get the moves of the current state before the move
         moves, mistakes = self.moveListDict[self.key]
         
-        # Update the key of the sudoku by adding the key value of this cell at the given value and the 0 value using bitwise XOR
+        # Update the key of the sudoku used for retrieving the moves
         self.key = self.newHashOfMove(move)
         
+        # If the moves after this move were not computed yet, compute them and add them to the dictionary
         if not(self.key in self.moveListDict):
             self.moveListDict[self.key] = (self.getSubset(moves, move, cell), self.getSubset(mistakes, move, cell))
         
@@ -191,6 +200,7 @@ class RegionSudokuBoard(object):
         
         # For the row, add the cell to the rows cell array at the proper index, increment the filled counter 
         # and if therefore the region is filled, increment the regionsFilled counter
+        # Also for all other cells within the same region, remove this value as a possible value
         cell.rowRegion.filledCells[move.value-1] = cell
         cell.rowRegion.filled += 1
         for otherCell in cell.rowRegion.allCells:
@@ -202,6 +212,7 @@ class RegionSudokuBoard(object):
         
         # For the column, add the cell to the columns cell array at the proper index, increment the filled counter 
         # and if therefore the region is filled, increment the regionsFilled counter
+        # Also for all other cells within the same region, remove this value as a possible value
         cell.colRegion.filledCells[move.value-1] = cell
         cell.colRegion.filled += 1
         for otherCell in cell.colRegion.allCells:
@@ -213,6 +224,7 @@ class RegionSudokuBoard(object):
         
         # For the box, add the cell to the box' cell array at the proper index, increment the filled counter 
         # and if therefore the region is filled, increment the regionsFilled counter
+        # Also for all other cells within the same region, remove this value as a possible value
         cell.boxRegion.filledCells[move.value-1] = cell
         cell.boxRegion.filled += 1
         for otherCell in cell.boxRegion.allCells:
@@ -221,7 +233,8 @@ class RegionSudokuBoard(object):
             otherCell.possibleValues[move.value-1] += 1
         if cell.boxRegion.filled >= self.N:
             regionsFilled += 1
-            
+        
+        # Check if this move violates the sudoku rules, if so return a mistake token
         if self.mistakeMove(cell):
             return "mistake"
         
@@ -242,6 +255,7 @@ class RegionSudokuBoard(object):
         self.emptyCount += 1
         
         # For the row, remove the cell from the rows cell array at the proper index and decrement the filled counter
+        # Also for all other cells within the same region, add this value as a possible value if no other cells contrain it
         cell.rowRegion.filledCells[cell.value-1] = self.emptyState
         cell.rowRegion.filled -= 1
         for otherCell in cell.rowRegion.allCells:
@@ -250,6 +264,7 @@ class RegionSudokuBoard(object):
                 otherCell.valueCount += 1
         
         # For the column, remove the cell from the columns cell array at the proper index and decrement the filled counter
+        # Also for all other cells within the same region, add this value as a possible value if no other cells contrain it
         cell.colRegion.filledCells[cell.value-1] = self.emptyState
         cell.colRegion.filled -= 1
         for otherCell in cell.colRegion.allCells:
@@ -258,6 +273,7 @@ class RegionSudokuBoard(object):
                 otherCell.valueCount += 1
         
         # For the box, remove the cell from the box' cell array at the proper index and decrement the filled counter
+        # Also for all other cells within the same region, add this value as a possible value if no other cells contrain it
         cell.boxRegion.filledCells[cell.value-1] = self.emptyState
         cell.boxRegion.filled -= 1
         for otherCell in cell.boxRegion.allCells:
@@ -298,73 +314,23 @@ class RegionSudokuBoard(object):
         return subsetMoves
     
     def mistakeMove(self, cell):
+        """
+        Determines if a move is illegal by the sudoku rules, and thus will be considered a mistake move
+        """
+        
+        # For all cells in the row
         for otherCell in cell.rowRegion.allCells:
+            
+            # If the cell had a value, then the move does not constrain it
             if otherCell.value != self.emptyState:
                 continue
+            
+            # If no value can be added to the cell, then the move was not allowed
             if otherCell.valueCount == 0:
                 return True
-            if otherCell.colRegion.filledCells[cell.value-1] == self.emptyState:
-                stillPossible = False
-                for regionCell in otherCell.colRegion.allCells:
-                    if regionCell.value != self.emptyState:
-                        continue
-                    if regionCell.possibleValues[cell.value-1] == 0:
-                        stillPossible = True
-                        break
-                if not stillPossible:
-                    return True
-            if otherCell.boxRegion.filledCells[cell.value-1] == self.emptyState:
-                stillPossible = False
-                for regionCell in otherCell.boxRegion.allCells:
-                    if regionCell.value != self.emptyState:
-                        continue
-                    if regionCell.possibleValues[cell.value-1] == 0:
-                        stillPossible = True
-                        break
-                if not stillPossible:
-                    return True
-        
-        for otherCell in cell.colRegion.allCells:
-            if otherCell.value != self.emptyState:
-                continue
-            if otherCell.valueCount == 0:
-                return True
-            if otherCell.rowRegion.filledCells[cell.value-1] == self.emptyState:
-                stillPossible = False
-                for regionCell in otherCell.rowRegion.allCells:
-                    if regionCell.value != self.emptyState:
-                        continue
-                    if regionCell.possibleValues[cell.value-1] == 0:
-                        stillPossible = True
-                        break
-                if not stillPossible:
-                    return True
-            if otherCell.boxRegion.filledCells[cell.value-1] == self.emptyState:
-                stillPossible = False
-                for regionCell in otherCell.boxRegion.allCells:
-                    if regionCell.value != self.emptyState:
-                        continue
-                    if regionCell.possibleValues[cell.value-1] == 0:
-                        stillPossible = True
-                        break
-                if not stillPossible:
-                    return True
-        
-        for otherCell in cell.boxRegion.allCells:
-            if otherCell.value != self.emptyState:
-                continue
-            if otherCell.valueCount == 0:
-                return True
-            if otherCell.rowRegion.filledCells[cell.value-1] == self.emptyState:
-                stillPossible = False
-                for regionCell in otherCell.rowRegion.allCells:
-                    if regionCell.value != self.emptyState:
-                        continue
-                    if regionCell.possibleValues[cell.value-1] == 0:
-                        stillPossible = True
-                        break
-                if not stillPossible:
-                    return True
+            
+            # If for the column that this cell is part of, no cell can have this
+            # value as possible value, then the move was not allowed
             if otherCell.colRegion.filledCells[cell.value-1] == self.emptyState:
                 stillPossible = False
                 for regionCell in otherCell.colRegion.allCells:
@@ -376,7 +342,98 @@ class RegionSudokuBoard(object):
                 if not stillPossible:
                     return True
             
+            # If for the box that this cell is part of, no cell can have this
+            # value as possible value, then the move was not allowed
+            if otherCell.boxRegion.filledCells[cell.value-1] == self.emptyState:
+                stillPossible = False
+                for regionCell in otherCell.boxRegion.allCells:
+                    if regionCell.value != self.emptyState:
+                        continue
+                    if regionCell.possibleValues[cell.value-1] == 0:
+                        stillPossible = True
+                        break
+                if not stillPossible:
+                    return True
+        
+        # For all cells in the column
+        for otherCell in cell.colRegion.allCells:
+            
+            # If the cell had a value, then the move does not constrain it
+            if otherCell.value != self.emptyState:
+                continue
+            
+            # If no value can be added to the cell, then the move was not allowed
+            if otherCell.valueCount == 0:
+                return True
+            
+            # If for the row that this cell is part of, no cell can have this
+            # value as possible value, then the move was not allowed
+            if otherCell.rowRegion.filledCells[cell.value-1] == self.emptyState:
+                stillPossible = False
+                for regionCell in otherCell.rowRegion.allCells:
+                    if regionCell.value != self.emptyState:
+                        continue
+                    if regionCell.possibleValues[cell.value-1] == 0:
+                        stillPossible = True
+                        break
+                if not stillPossible:
+                    return True
+                
+            # If for the box that this cell is part of, no cell can have this
+            # value as possible value, then the move was not allowed
+            if otherCell.boxRegion.filledCells[cell.value-1] == self.emptyState:
+                stillPossible = False
+                for regionCell in otherCell.boxRegion.allCells:
+                    if regionCell.value != self.emptyState:
+                        continue
+                    if regionCell.possibleValues[cell.value-1] == 0:
+                        stillPossible = True
+                        break
+                if not stillPossible:
+                    return True
+        
+        # For all cells in the box
+        for otherCell in cell.boxRegion.allCells:
+            
+            # If the cell had a value, then the move does not constrain it
+            if otherCell.value != self.emptyState:
+                continue
+            
+            # If no value can be added to the cell, then the move was not allowed
+            if otherCell.valueCount == 0:
+                return True
+            
+            # If for the row that this cell is part of, no cell can have this
+            # value as possible value, then the move was not allowed
+            if otherCell.rowRegion.filledCells[cell.value-1] == self.emptyState:
+                stillPossible = False
+                for regionCell in otherCell.rowRegion.allCells:
+                    if regionCell.value != self.emptyState:
+                        continue
+                    if regionCell.possibleValues[cell.value-1] == 0:
+                        stillPossible = True
+                        break
+                if not stillPossible:
+                    return True
+                
+            # If for the column that this cell is part of, no cell can have this
+            # value as possible value, then the move was not allowed
+            if otherCell.colRegion.filledCells[cell.value-1] == self.emptyState:
+                stillPossible = False
+                for regionCell in otherCell.colRegion.allCells:
+                    if regionCell.value != self.emptyState:
+                        continue
+                    if regionCell.possibleValues[cell.value-1] == 0:
+                        stillPossible = True
+                        break
+                if not stillPossible:
+                    return True
+        
+        # If none of these contraints were an issue, then this move is fine as far as we know
         return False
     
     def newHashOfMove(self, move):
+        """
+        Returns the new hash of the board after a move is played
+        """
         return self.key ^ self.keyGenerator[move.i][move.j][0] ^ self.keyGenerator[move.i][move.j][move.value]

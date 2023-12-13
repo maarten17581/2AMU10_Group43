@@ -410,23 +410,23 @@ class SudokuAI(competitive_sudoku.sudokuai.SudokuAI):
             if rowRegion.filled == 0:
                 regionSum += 1
             if rowRegion.filled == N-1:
-                regionSum -= 1
+                regionSum -= N
         for colRegion in board.colRegions:
             if colRegion.filled == 0:
                 regionSum += 1
             if colRegion.filled == N-1:
-                regionSum -= 1
+                regionSum -= N
         for boxRegion in board.boxRegions:
             if boxRegion.filled == 0:
                 regionSum += 1
             if boxRegion.filled == N-1:
-                regionSum -= 1
+                regionSum -= N
                 
         # Add the score, the regionSum and a value based on whether we are the last playing player or not together
         # Note here that as regionSum < 3*N any point scored is better then any amount of regionSum or last playing player bonus
         # as well as the last playing player bonus always being better then any amount of regionSum
         return score*8*N + regionSum + (4*N if (maximizingPlayer and board.emptyCount % 2 == 1) \
-                                        or (not maximizingPlayer and board.emptyCount % 2 != 1) else -3*N)
+                                        or (not maximizingPlayer and board.emptyCount % 2 != 1) else -4*N)
     
     def evalSort(self, moves):
         """

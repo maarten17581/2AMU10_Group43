@@ -20,6 +20,10 @@ class Cell(object):
         self.rowRegion: Region = 0
         self.colRegion: Region = 0
         self.boxRegion: Region = 0
+        
+        # Initiallize an array of counters for all values. Here a counter is the amount of cells that constrain
+        # this cell from being that value, thus if the counter is 0, it is possible
+        # ValueCount keeps track of the amount of values that are legal in this cell
         self.possibleValues = []
         self.valueCount = 0
         

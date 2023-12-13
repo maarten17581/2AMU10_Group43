@@ -15,11 +15,10 @@ class Region(object):
         self.m = m
         self.N = N
         
-        # Initialize the array of cells that are contained within this region.
-        # They are sorted by value, where the index corresponds to the value of the cell.
-        # This is done for efficient value finding
+        # An array of only those cells that have a value, stored at the index of there value for efficient searching
         self.filledCells = []
         
+        # An array of all cells that are part of the region
         self.allCells = []
         
         # A counter for the number of values that are already placed in this region
